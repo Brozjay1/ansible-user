@@ -1,0 +1,48 @@
+---
+- name: User Management and Repo Setup
+  hosts: webservers
+  become: yes
+
+  vars:
+    user_name: my_user
+    user_password: "$6$HEB.9sP4IwvNEFOX$TDWdwhoZKbh57ETTwZLDb5yHnFBhD8JS3fa4gOHjeMc88DBy4JBdKB7WBp2cY.SiQpPyl9EOVFZ.kVGOOu7BY."
+    group_name: my_group
+    repo_url: "https://github.com/monyslim/pix-mix.git"
+    clone_dir: "/home/my_user/ansible_repo"
+
+  tasks:
+    - name: Create a new user with password
+      user:
+        name: "my_user"
+        password: "$6$HEB.9sP4IwvNEFOX$TDWdwhoZKbh57ETTwZLDb5yHnFBhD8JS3fa4gOHjeMc88DBy4JBdKB7WBp2cY.SiQpPyl9EOVFZ.kVGOOu7BY."
+        state: present
+
+    - name: Create a new group
+      group:
+        name: "my_group"
+        state: present
+
+    - name: Add user to the group
+      user:
+        name: "my_user"
+        groups: "my_group"
+        append: yes
+
+    - name: Clone the repository
+      git:
+        repo: "https://github.com/monyslim/pix-mix.git"
+        dest: "/home/my_user/ansible_repo"
+        update: no
+
+    - name: Change ownership of the repo directory
+      file:
+        path: "/home/my_user/ansible_repo"
+        owner: "my_user"
+        group: "my_group"
+        recurse: yes
+
+    - name: Ensure user can access the repo directory
+      file:
+        path: "/home/my_user/ansible_repo"
+        mode: '0755'
+        recurse: yes
